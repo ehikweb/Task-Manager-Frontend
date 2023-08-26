@@ -1,21 +1,31 @@
 import React, { useEffect, useState } from "react";
 import editIcon from "../assets/Icons/edit_icon.png";
 import deleteIcon from "../assets/Icons/delete_icon.png";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 const MyTask = ({ baseURL }) => {
-const [data, setData] = useState(null)
+  const [data, setData] = useState(null);
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const getData = async ()=>{
-      const response = await fetch(`${baseURL}/tasks`) 
-      const data= await response.json()
-      setData(data.tasks)
-      console.log(data.tasks)
-    }
+    const getData = async () => {
+      const response = await fetch(`${baseURL}/tasks`);
+      const data = await response.json();
+      setData(data.tasks);
+      console.log(data.tasks);
+    };
 
-    getData()
+    getData();
   }, []);
+
+  const deleteTask = async (id) => {
+    const res = await fetch(`${baseURL}/${id}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    console.log(data);
+    navigate(0)
+  };
 
   return (
     <div className="container">
@@ -31,46 +41,49 @@ const [data, setData] = useState(null)
       </div>
 
       <div className="d-flex flex-column gap-5 ">
-        {data && data.map((eachTask) => {
-          const { _id, title, description, tag } = eachTask;
-          let textColor =
-            tag.toLowerCase().trim() === "urgent"
-              ? "text-danger"
-              : "text-success";
+        {data &&
+          data.map((eachTask) => {
+            const { _id, title, description, tag } = eachTask;
+            let textColor =
+              tag.toLowerCase().trim() === "urgent"
+                ? "text-danger"
+                : "text-success";
 
-          return (
-            <div
-              key={_id}
-              className="border border-2 border-light p-3 rounded-3"
-            >
-              <div className="d-flex justify-content-between">
-                <p className={`m-0 ${textColor}`}>{eachTask.tag}</p>
-                <div className="d-flex align-items-center gap-3">
-                  <Link
-                    to={`/edit-task/${_id}`}
-                    className="btn text-white bg-main-color d-flex align-items-center gap-1"
-                  >
-                    {" "}
-                    <img src={editIcon} alt="edit-Icon" />
-                    Edit
-                  </Link>
-                  <button className="btn text-main-color border-main-color border-1 d-flex align-items-center gap-1">
-                    <img src={deleteIcon} alt="" />
-                    Delete
-                  </button>
+            return (
+              <div
+                key={_id}
+                className="border border-2 border-light p-3 rounded-3"
+              >
+                <div className="d-flex justify-content-between">
+                  <p className={`m-0 ${textColor}`}>{eachTask.tag}</p>
+                  <div className="d-flex align-items-center gap-3">
+                    <Link
+                      to={`/edit-task/${_id}`}
+                      className="btn text-white bg-main-color d-flex align-items-center gap-1"
+                    >
+                      {" "}
+                      <img src={editIcon} alt="edit-Icon" />
+                      Edit
+                    </Link>
+                    <button onClick={()=>{
+                      deleteTask(_id)
+                    }} className="btn text-main-color border-main-color border-1 d-flex align-items-center gap-1">
+                      <img src={deleteIcon} alt="" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-md-start py-3 border-top border-light border-2">
+                  <p className="fs-3 fw-semibold">{title}</p>
+                  <p className="text-secondary">{description}</p>
+
+                  {/* <p>{eachTask.title}</p>
+              <p>{eachTask.description}</p> */}
                 </div>
               </div>
-
-              <div className="text-md-start py-3 border-top border-light border-2">
-                <p className="fs-3 fw-semibold">{title}</p>
-                <p className="text-secondary">{description}</p>
-
-                {/* <p>{eachTask.title}</p>
-              <p>{eachTask.description}</p> */}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
       <p className="py-5 text-main-color fw-semibold fs-5 text-decoration-underline">
         Back To Top
